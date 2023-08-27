@@ -30,7 +30,7 @@ class httpHandler:
             logging.info("Sending request to {}".format(self._url))
             # 根据请求方法发送请求
             if self._method == "post":
-                req = requests.post(self._url, headers=header, data=self._args)
+                req = requests.post(self._url, headers=header, json=self._args)
             elif self._method == "get":
                 req = requests.get(self._url, headers=header, params=self._args)
             else:
@@ -45,7 +45,8 @@ class httpHandler:
             self._rateLimit.update(resp_header)
             # 处理错误码
             if code != 0:
-                logging.warning("API request failed with code {} and message {}".format(code, message))
+                logging.warning("API request failed with code {} and message: {}".format(code, message))
+                logging.warning(req.request.body)
                 return data
             else:
                 return data
