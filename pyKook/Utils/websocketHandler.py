@@ -1,3 +1,5 @@
+import asyncio
+
 import websockets
 import logging
 import json
@@ -5,7 +7,7 @@ from typing import Callable
 
 
 class websocketHandler:
-    def __init__(self, url: str, handler: Callable[[dict], None]):
+    def __init__(self, url: str, handler: callable):
         self._url = url
         self._message_handler = handler
         self._onlineFlag = True
@@ -25,7 +27,15 @@ class websocketHandler:
                             logging.debug("Message is bytes, decoding...")
                             message = message.decode()
                         message = json.loads(message)
-                        self._message_handler(message)
+
+                        # 目前的消息格式是这样的：
+                        # {
+                        #     "s" : 1,  // int, 信令，详情参照信令说明
+                        #     "d" : {}, // 数据字段mixed
+                        #     "sn" : 0, // int, 该字段并不一定有，只在s=0时有，与webhook一致。
+                        # }
+                        message = message["d"]
+                        await self._message_handler(message)
                     except json.JSONDecodeError:
                         logging.error(
                             "JSON decode error! Seems server sent a wrong message?"
@@ -35,13 +45,16 @@ class websocketHandler:
                         logging.warning(
                             "Connection closed! [Normal Connection Closure]"
                         )
+                        await asyncio.sleep(3)
                     except websockets.ConnectionClosedError:
                         logging.error(
                             "Connection closed! [Network Error or Protocol Error]"
                         )
+                        await asyncio.sleep(3)
                     except Exception as e:
                         logging.error("Unknown error!")
                         logging.error(str(e))
+                        await asyncio.sleep(3)
                         break
 
     def stopHandler(self):
