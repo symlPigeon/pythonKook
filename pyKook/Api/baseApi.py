@@ -45,6 +45,7 @@ class multiPageAPI(baseAPI):
         super().__init__(url, method, config, **args)
         self._cached_data = []  # 缓存数据避免请求
         self._cached_resp = False  # 如果服务器返回空值，为了避免程序认为没有数据而重复请求，需要设置这个值为True
+        self._cached_partial_resp = False
 
     def _render(self, data: dict) -> list:
         raise NotImplementedError("This method must be implemented by subclass!")
@@ -58,15 +59,20 @@ class multiPageAPI(baseAPI):
         # 在默认情况下会先请求第一页的数据
         resp = (await self._request())[0]
         data += self._render(resp)  # to be implemented by subclass
+        self._cached_partial_resp = True
         try:
             # 获取meta data
             meta = resp["meta"]
             total_page = meta["page_total"]
             page_size = meta["page_size"]
-            total_items = meta["total_items"]
-        except KeyError:
+            total_items = meta["total"]
+            logging.info(
+                "Total {} items found in {} pages.".format(total_items, total_page)
+            )
+        except KeyError as e:
             # 发生了这个问题说明meta字段有问题
-            logging.error("No meta data found for multi-page API!")
+            logging.error("No meta data or corrupted data found for multi-page API!")
+            logging.error("KeyError: {}".format(e))
             self._cached_data = data
             self._cached_resp = True
             # 既然这样的话，直接返回第一页的数据
@@ -74,14 +80,29 @@ class multiPageAPI(baseAPI):
         logging.info("Begin requesting for {} pages of data".format(total_page))
         arg_list = []
         for p in range(2, total_page + 1):
-            arg_list.append(self._args.update(page=p, page_size=page_size))
+            arg_list.append(self._args.update(page=p))
+        if not arg_list:
+            # 如果没有需要请求的数据，说明只有一页
+            self._cached_data = data
+            self._cached_resp = True
+            return data
+        self._handler.setArgs(arg_list)  # ignore this type hint...
         resp = await self._handler.request()
-        data = []
         for resp_ in resp:
             data += self._render(resp_)
+        while {} in data:
+            data.remove({})
         logging.info("Finished requesting for {} pages of data".format(total_page))
         self._cached_data = data
         self._cached_resp = True
+        return data
+
+    async def getOnePageData(self) -> list:
+        data = []
+        # 在默认情况下会先请求第一页的数据
+        resp = (await self._request())[0]
+        data += self._render(resp)  # to be implemented by subclass
+        self._cached_partial_resp = True
         return data
 
     async def getCached(self) -> list:

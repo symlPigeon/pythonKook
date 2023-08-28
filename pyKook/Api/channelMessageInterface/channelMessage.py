@@ -21,5 +21,16 @@ class sendChannelMsgAPI(baseAPI):
     def _render(self, data: dict) -> dict:
         return data
 
-    def send(self):
-        return self.getData()
+    async def send(self):
+        return await self.getData()
+
+
+class deleteChannelMsgAPI(baseAPI):
+    def __init__(self, config: accountConfig, msg_id: str):
+        super().__init__("/api/v3/message/delete", "post", config, msg_id=msg_id)
+
+    def _render(self, data: dict) -> dict:
+        return {}
+
+    async def delete(self):
+        return await self.getData()

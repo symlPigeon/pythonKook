@@ -20,7 +20,7 @@ class getUserGroupListAPI(multiPageAPI):
             items = data["items"]
         except KeyError:
             logging.error("Invalid response!")
-            items = ""
+            items = []
         return items
 
     async def getGroupIdList(self) -> list[str]:

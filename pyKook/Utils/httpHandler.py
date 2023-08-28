@@ -46,9 +46,8 @@ class httpHandler:
                     req = [grequests.get(self._url, headers=header, params=self._args)]
                 else:
                     req = []
-                    req.append(
-                        grequests.get(self._url, headers=header, params=self.arg)
-                    )
+                    for arg in self._args:
+                        req.append(grequests.get(self._url, headers=header, params=arg))
             else:
                 raise Exception("Invalid method!")
             data = []
