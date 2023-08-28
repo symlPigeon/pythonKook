@@ -15,7 +15,7 @@ class httpHandler:
     def _createHeader(self):
         header = {
             "Authorization": self._config.getAuthToken(),
-            "Accept-Language": self._config.getLang()
+            "Accept-Language": self._config.getLang(),
         }
         if self._method == "post":
             header["Content-type"] = "application/json"
@@ -45,7 +45,11 @@ class httpHandler:
             self._rateLimit.update(resp_header)
             # 处理错误码
             if code != 0:
-                logging.warning("API request failed with code {} and message: {}".format(code, message))
+                logging.warning(
+                    "API request failed with code {} and message: {}".format(
+                        code, message
+                    )
+                )
                 logging.warning(req.request.body)
                 return data
             else:
@@ -54,7 +58,11 @@ class httpHandler:
             logging.error("Connection Error when requesting to {}".format(self._url))
             return {}
         except requests.exceptions.JSONDecodeError:
-            logging.error("Response from {} seems not contain valid information!".format(self._url))
+            logging.error(
+                "Response from {} seems not contain valid information!".format(
+                    self._url
+                )
+            )
             return {}
         except KeyError as e:
             logging.error("Response does not obey the standard format! Missing keys!")

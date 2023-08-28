@@ -8,6 +8,7 @@ class getUserGroupListAPI(multiPageAPI):
     """
     获取用户群组接口
     """
+
     def __init__(self, config: accountConfig):
         super().__init__("/api/v3/guild/list", "get", config)
 
@@ -24,6 +25,7 @@ class getGroupInfoAPI(baseAPI):
     """
     获取群组详细信息
     """
+
     def __init__(self, config: accountConfig, groupid: str):
         super().__init__("/api/v3/guild/view", "get", config, guild_id=groupid)
         self._group_info = {}

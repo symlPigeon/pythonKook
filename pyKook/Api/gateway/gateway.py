@@ -2,10 +2,12 @@ from pyKook.Api.baseApi import baseAPI
 from pyKook.Config.config import accountConfig
 import logging
 
+
 class getGatewayAPI(baseAPI):
     """
     获取Gateway接口
     """
+
     def __init__(self, config: accountConfig):
         super().__init__("/api/v3/gateway/index", "get", config, compress=0)
 

@@ -4,6 +4,7 @@ import logging
 
 baseUrl = "https://www.kookapp.cn"
 
+
 class baseAPI:
     def __init__(self, url: str, method: str, config: accountConfig, **args):
         self._url = baseUrl + url
@@ -38,6 +39,7 @@ class multiPageAPI(baseAPI):
     会自动根据页数请求每一页的数据
     注意实现时_render方法处理的是整个data结构体，包含了meta等部分，而不是仅data中的数据部分
     """
+
     def __init__(self, url: str, method: str, config: accountConfig, **args):
         super().__init__(url, method, config, **args)
 
@@ -52,7 +54,7 @@ class multiPageAPI(baseAPI):
         data = []
         # 在默认情况下会先请求第一页的数据
         resp = self._request()
-        data += self._render(resp) # to be implemented by subclass
+        data += self._render(resp)  # to be implemented by subclass
         try:
             # 获取meta data
             meta = resp["meta"]
