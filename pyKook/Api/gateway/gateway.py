@@ -19,9 +19,9 @@ class getGatewayAPI(baseAPI):
             gateway = ""
         return gateway
 
-    def getGateway(self) -> str:
+    async def getGateway(self) -> str:
         """
         获取网关地址
         :return: 网关地址，如果获取失败了应该会得到一个空串
         """
-        return self.getData()
+        return await self.getData()

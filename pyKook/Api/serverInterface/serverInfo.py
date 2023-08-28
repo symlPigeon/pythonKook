@@ -2,6 +2,9 @@ from pyKook.Api.baseApi import baseAPI, multiPageAPI
 import logging
 
 from pyKook.Config.config import accountConfig
+from pyKook.Api.objects.Guild import Guild
+from pyKook.Api.objects.Role import Role
+from pyKook.Api.objects.Channel import Channel
 
 
 class getUserGroupListAPI(multiPageAPI):
@@ -20,6 +23,17 @@ class getUserGroupListAPI(multiPageAPI):
             items = ""
         return items
 
+    async def getGroupIdList(self) -> list[str]:
+        """
+        获取群组列表
+        :return:
+        """
+        groups = await self.getCached()
+        id_list = []
+        for group in groups:
+            id_list.append(group["id"])
+        return id_list
+
 
 class getGroupInfoAPI(baseAPI):
     """
@@ -34,44 +48,45 @@ class getGroupInfoAPI(baseAPI):
         self._group_info = data
         return self._group_info
 
-    def getRoles(self) -> dict:
+    async def getRoles(self) -> list[Role]:
         """
         获取用户在群组里面的角色
         :return:
         """
         # 如果没有数据就刷新数据
         if self._group_info == {}:
-            self._render(self._request())
+            self._render(await self._request())
         try:
-            return self._group_info["roles"]
+            roles = []
+            for role in self._group_info["roles"]:
+                roles.append(Role(**role))
+            return roles
         except KeyError:
             logging.error("No roles found in group info!")
-            return {}
+            return []
 
-    def getChannels(self) -> dict:
+    async def getChannels(self) -> list[Channel]:
         """
         获取群组的频道信息
         :return:
         """
         # 如果没有数据就刷新数据
         if self._group_info == {}:
-            self._render(self._request())
+            self._render(await self._request())
         try:
-            return self._group_info["channels"]
+            chns = []
+            for chn in self._group_info["channels"]:
+                chns.append(Channel(**chn))
+            return chns
         except KeyError:
             logging.error("No channels found in group info!")
-            return {}
+            return []
 
-    def getGroupInfo(self) -> dict:
+    async def getGroupInfo(self) -> Guild:
         """
         获取群组的基本信息
         :return:
         """
         if self._group_info == {}:
-            self._render(self._request())
-        data = self._group_info.copy()
-        if "channels" in data:
-            del data["channels"]
-        if "roles" in data:
-            del data["roles"]
-        return data
+            self._render(await self._request())
+        return Guild(**self._group_info)
