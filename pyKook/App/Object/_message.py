@@ -35,3 +35,17 @@ class Message:
         :return:
         """
         return self._msg["author_id"]
+
+    def content(self) -> str:
+        """
+        获取消息内容
+        :return:
+        """
+        return self._msg["content"]
+
+    def getId(self) -> str:
+        """
+        获取消息ID
+        :return:
+        """
+        return self._msg["msg_id"]

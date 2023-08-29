@@ -1,13 +1,54 @@
 <!-- TOC -->
 * [pythonKook](#pythonkook)
   * [项目结构](#项目结构)
+  * [事件处理机制](#事件处理机制)
   * [施工进度](#施工进度)
     * [API施工进度](#api施工进度)
     * [更好的HTTP请求性能](#更好的http请求性能)
+    * [上层的封装](#上层的封装)
+* [感谢和免责声明](#感谢和免责声明)
 <!-- TOC -->
 
 # pythonKook
 自用Kook机器人轮子，希望能够为自己写Kook机器人的时候提供一些便利。
+
+## 使用方法
+
+### 安装
+
+我暂时还没想好该怎么弄，先直接git clone下来然后import吧！
+
+后面考虑用pip之类的方法来搞。
+
+### 使用
+
+#### 最简单的样例
+
+```python
+from pyKook.App.Bot import Bot
+from pyKook.Config import accountConfig, botConfig
+
+import asyncio
+
+account_conf = accountConfig("Bot", "你的token", "zh-CN")
+# 使用 . 来做命令前缀，比如说.r 1d6， .kick xxx等等
+bot_conf = botConfig(command=".")
+# 你的Bot对象
+bot = Bot({"accountConfig": account_conf, "botConfig": bot_conf})
+
+@bot.on_event("isMentioned.atMe") # 有人at我
+async def onMentioned(event):
+    await bot.sendText(event.getChannel(), "你好！")
+    
+@bot.on_command("roll")
+async def onRoll(event):
+    import random
+    await bot.sendText(event.getChannel(), "你掷出了一个1d6的骰子，结果是：{}".format(random.randint(1, 6)))
+
+async def main():
+    await bot.initialize()
+asyncio.run(main())
+```
 
 ## 项目结构
 

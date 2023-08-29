@@ -34,8 +34,9 @@ class websocketHandler:
                         #     "d" : {}, // 数据字段mixed
                         #     "sn" : 0, // int, 该字段并不一定有，只在s=0时有，与webhook一致。
                         # }
-                        message = message["d"]
-                        await self._message_handler(message)
+                        if message["s"] == 0:  # 仅交由上层处理事件包
+                            message = message["d"]
+                            await self._message_handler(message)
                     except json.JSONDecodeError:
                         logging.error(
                             "JSON decode error! Seems server sent a wrong message?"

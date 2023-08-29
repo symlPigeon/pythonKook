@@ -1,7 +1,7 @@
 from pyKook.Api.baseApi import baseAPI, multiPageAPI
 import logging
 
-from pyKook.Config.config import accountConfig
+from pyKook.Config.accountConfig import accountConfig
 from pyKook.Api.objects.Guild import Guild
 from pyKook.Api.objects.Role import Role
 from pyKook.Api.objects.Channel import Channel

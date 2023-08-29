@@ -28,3 +28,12 @@ class cachedInfo:
             return self._channel_cache[channel_id]
         else:
             return None
+
+    def addUser(self, user: User):
+        self._user_cache[user.getId()] = user
+
+    def addGroup(self, group: Guild):
+        self._group_cache[group.getId()] = group
+
+    def addChannel(self, channel: Channel):
+        self._channel_cache[channel.getId()] = channel

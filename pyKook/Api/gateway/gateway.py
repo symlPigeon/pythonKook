@@ -1,5 +1,5 @@
 from pyKook.Api.baseApi import baseAPI
-from pyKook.Config.config import accountConfig
+from pyKook.Config.accountConfig import accountConfig
 import logging
 
 

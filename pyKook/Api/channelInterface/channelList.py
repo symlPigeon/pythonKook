@@ -1,6 +1,6 @@
 from pyKook.Api.baseApi import baseAPI, multiPageAPI
 from pyKook.Api.objects.Channel import Channel
-from pyKook.Config.config import accountConfig
+from pyKook.Config.accountConfig import accountConfig
 
 
 class getChannelListAPI(multiPageAPI):

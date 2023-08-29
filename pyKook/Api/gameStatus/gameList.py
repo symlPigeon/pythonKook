@@ -1,7 +1,7 @@
 import logging
 
 from pyKook.Api.baseApi import multiPageAPI
-from pyKook.Config.config import accountConfig
+from pyKook.Config.accountConfig import accountConfig
 
 
 class getGameListAPI(multiPageAPI):

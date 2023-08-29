@@ -1,6 +1,6 @@
 import grequests
 import requests
-from pyKook.Config.config import accountConfig
+from pyKook.Config.accountConfig import accountConfig
 from pyKook.Utils.rateLimitRender import rateLimitRender
 import logging
 

@@ -1,4 +1,4 @@
-from pyKook.Config.config import accountConfig
+from pyKook.Config.accountConfig import accountConfig
 from pyKook.Utils.httpHandler import httpHandler
 import logging
 
