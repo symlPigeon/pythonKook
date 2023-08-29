@@ -1,11 +1,15 @@
+import logging
 from typing import Tuple
 from pyKook.Api.constants.messageType import MSG_TYPE
 
 
 class Message:
-    def __init__(self, msg: dict, event_id: str):
+    def __init__(self, msg: dict, event_id: str, callbacks=None):
         self._msg = msg
         self._event_id = event_id
+        self._callbacks = {}
+        if callbacks:
+            self._callbacks = callbacks
 
     def getGroup(self) -> str:
         """
@@ -26,8 +30,7 @@ class Message:
         """
         if self._msg["type"] != MSG_TYPE.SYSTEM:
             return self._msg["target_id"]
-        else:
-            return ""
+        return self._msg.get("channel_id", "")
 
     def getAuthorId(self) -> str:
         """
@@ -49,3 +52,13 @@ class Message:
         :return:
         """
         return self._msg["msg_id"]
+
+    def getCallback(self, value: str) -> tuple[callable, dict]:
+        """
+        获取这个消息绑定事件的回调函数，如果有的话……
+        :param value:
+        :return:
+        """
+        if value in self._callbacks:
+            return self._callbacks[value]
+        return None, {}

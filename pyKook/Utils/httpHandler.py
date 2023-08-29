@@ -67,7 +67,9 @@ class httpHandler:
                             code, message
                         )
                     )
-                    logging.warning(resp.request.body)
+                    logging.warning(resp)
+                    logging.warning("Request URL: {}".format(self._url))
+                    logging.warning("Request data: {}".format(self._args))
                     data.append(data_)
                 else:
                     data.append(data_)

@@ -24,7 +24,7 @@ class contextSession:
         self._timer = Timer(timeout, self._sessionPool.kill, session=self)
 
     def _precheck(self, msg: Message) -> bool:
-        if self._channel_id != msg.getChannel():
+        if self._channel_id != msg.getChannel():  # 会话只有在同一个channel里面才能够进行
             return False
         return True
 

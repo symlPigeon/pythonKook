@@ -1,5 +1,5 @@
 [build-system]
-requires = ["flit_core >=3.2,<4", "wheel", "grequests", "websockets"]
+requires = ["flit_core >=3.2,<4", "wheel"]
 build-backend = "flit_core.buildapi"
 
 [project]
@@ -7,3 +7,6 @@ name = "pyKook"
 authors = [{name = "symlpigeon", email = "symlpigeon@foxmail.com"}]
 readme = "README.md"
 dynamic = ["version", "description"]
+dependencies = [
+"grequests", "websockets"
+]

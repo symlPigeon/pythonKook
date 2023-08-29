@@ -55,6 +55,7 @@ class websocketHandler:
                     except Exception as e:
                         logging.error("Unknown error!")
                         logging.error(str(e))
+                        raise e
                         await asyncio.sleep(3)
                         break
 

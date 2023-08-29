@@ -30,7 +30,10 @@ class websocketMsgHandler:
                 obj().register(self)
 
         # App模块给过来的函数处理
-        self._app_handler = lambda x, y: None
+        async def _nothing_handler(x, y):
+            ...
+
+        self._app_handler = _nothing_handler
 
     def init(self, app_handler, botInfo: User, context: sessionPool):
         self._app_handler = app_handler
@@ -70,7 +73,9 @@ class websocketMsgHandler:
                 # 一般频道消息
                 logging.info("Message type: {}".format(msg_type))
                 logging.info("sending to text_message handler")
-                event_id = self._event_handlers["text_message"](extra, self._bot_info)
+                msg, event_id = self._event_handlers["text_message"](
+                    msg, self._bot_info
+                )
                 message = Message(msg, event_id)
                 logging.info("Message event id: {}".format(event_id))
                 if self._context.handle(message):
@@ -81,7 +86,17 @@ class websocketMsgHandler:
                 return
             case MSG_TYPE.SYSTEM:
                 # 系统消息，比较麻烦
-                logging.warning("System message not implemented yet.")
+                try:
+                    msg, event_id = self._event_handlers[extra["type"]](
+                        msg, self._bot_info
+                    )
+                except KeyError as e:
+                    logging.warning("System message not implemented yet.")
+                    return
+                message = Message(msg, event_id)
+                logging.info("Message event id: {}".format(event_id))
+                logging.info("Passing message to app handler...")
+                await self._app_handler(event_id, message)
                 return
             case _:
                 # 不知道啥东西
