@@ -10,8 +10,6 @@ from pyKook.Api.channelMessageInterface.channelMessage import (
     deleteChannelMsgAPI,
 )
 from pyKook.Utils.cache import CACHED_INFO
-from pyKook.Utils.timer import Timer
-from pyKook.Api.channelMessageInterface.channelMessage import getChannelMsgAPI
 from pyKook.Config import accountConfig, botConfig
 from functools import wraps
 import logging
@@ -28,10 +26,11 @@ class Bot:
         self._callback_pool = {}
         self._privilege_callback_pool = {}
         self._cached_info = CACHED_INFO
+        self._startup_list = []
 
     async def _msg_handler(self, event_id: str, msg: Message):
         # 缓存一下捏
-        # self._cached_info.addMessage(msg)
+        # self._cached_info.addMessage(msg) # BUG:
 
         # 处理特殊的消息类型
         match event_id.split(".")[0]:
@@ -66,7 +65,53 @@ class Bot:
         else:
             logging.warning("Event not handled: %s" % event_id)
 
+    def unload_handler(self, event_id: str, func: callable = None):
+        """
+        卸载某个事件的处理函数
+        :param event_id: 事件ID
+        :param func: 可选的，避免两个模组注册同一个事件时出现问题，不过好像不会出现这种情况？？？
+        :return:
+        """
+        if event_id in self._callback_pool:
+            if func == self._callback_pool[event_id] or not func:
+                del self._callback_pool[event_id]
+        if event_id in self._privilege_callback_pool:
+            if func == self._privilege_callback_pool[event_id] or not func:
+                del self._privilege_callback_pool[event_id]
+
+    def load_handler(self, event_id: str, func: callable):
+        """
+        加载某个事件的处理函数
+        :param event_id: 事件ID
+        :param func: 处理函数
+        :return:
+        """
+        if event_id in self._callback_pool:
+            logging.warning("Event handler already exists! Overwriting...")
+        self._callback_pool[event_id] = func
+
+    def on_setup(self):
+        def _wrap_on_setup(callback):
+            self._startup_list.append(callback)
+            logging.info("Warping function {} for startup".format(callback))
+
+            @wraps(callback)
+            def _warp():
+                return callback
+
+            return _warp
+
+        return _wrap_on_setup
+
     def on_event(self, event_id: str, privileged: bool = False):
+        """
+        比`on_event`和`privileged`更加基本的修饰器，在各类事件被触发时调用对应的函数。
+        请阅读文档（咕咕咕）来了解相应的事件ID。
+        :param event_id: 事件ID
+        :param privileged: 是否为高权限事件，也就是只有在`botConfig`中的管理员用户才能触发
+        :return:
+        """
+
         def _wrap_on_event(callback):
             if privileged:
                 self._privilege_callback_pool[event_id] = callback
@@ -105,20 +150,23 @@ class Bot:
         logging.info("Gateway fetched.")
         return url
 
-    async def _get_basic_info(self):
+    async def _preinit_get_basic_info(self):
         logging.info("Fetching basic info of bot...")
         self._bot_info = await getCurrentUserInfoAPI(self._accountConfig).getUserInfo()
         self._cached_info.addUser(self._bot_info)
         logging.info("Basic info fetched.")
 
+    async def _preinit_run_all_startup_tasks(self):
+        logging.info("Running all startup tasks...")
+        for task in self._startup_list:
+            await task()
+        logging.info("All startup tasks finished.")
+
     async def initialize(self):
         logging.info("Initializing bot...")
-        logging.info("Privileged command pool:")
-        logging.info("\n".join(self._privilege_callback_pool.keys()))
-        logging.info("Command pool:")
-        logging.info("\n".join(self._callback_pool.keys()))
         url = await self._preinit_get_gateway()
-        await self._get_basic_info()
+        await self._preinit_get_basic_info()
+        await self._preinit_run_all_startup_tasks()
         if url == "":
             raise Exception("Failed to get gateway.")
         self._wshandler = websocketMsgHandler()
@@ -172,7 +220,7 @@ class Bot:
         except KeyError:
             logging.error("Failed to send text!")
             logging.error("Content: {}".format(content))
-            return
+            return ""
         self._cache_sent_message(content, msg_id, channelId)
         return msg_id
 

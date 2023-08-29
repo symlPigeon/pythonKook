@@ -18,13 +18,13 @@ class chatMessageHandler(baseEventHandler):
             # 直接at机器人
             logging.info("Message at me.")
             print("message at me")
-            return "isMentioned.atMe"
+            return msg, "isMentioned.atMe"
         if extra["mention_all"]:
             # at全体
             logging.info("Message at all.")
-            return "isMentioned.atAll"
+            return msg, "isMentioned.atAll"
         if extra["mention_here"]:
             # at 在线成员
             logging.info("Message at here.")
-            return "isMentioned.atHere"
+            return msg, "isMentioned.atHere"
         return msg, "normalMessage"
