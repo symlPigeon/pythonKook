@@ -1,5 +1,5 @@
 from pyKook.Api.baseApi import baseAPI, multiPageAPI
-import logging
+from pyKook.Utils.loggingTool import logging
 
 from pyKook.Config.accountConfig import accountConfig
 from pyKook.Api.objects.Guild import Guild

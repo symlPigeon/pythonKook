@@ -1,5 +1,5 @@
 import json
-import logging
+from pyKook.Utils.loggingTool import logging
 
 
 class Card:

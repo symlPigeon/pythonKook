@@ -1,5 +1,5 @@
 import asyncio
-import logging
+from pyKook.Utils.loggingTool import logging
 
 
 class Timer:

@@ -2,7 +2,7 @@ import grequests
 import requests
 from pyKook.Config.accountConfig import accountConfig
 from pyKook.Utils.rateLimitRender import rateLimitRender
-import logging
+from pyKook.Utils.loggingTool import logging
 
 
 class httpHandler:

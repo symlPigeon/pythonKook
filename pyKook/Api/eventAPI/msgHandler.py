@@ -1,4 +1,3 @@
-import logging
 from typing import Callable, Optional
 
 from pyKook.Api.constants.messageType import MSG_TYPE
@@ -8,6 +7,7 @@ from pyKook.App.Object import Message
 from pyKook.App.Session import sessionPool
 from pyKook.Utils.singleton import singleton
 from pyKook.Utils.websocketHandler import websocketHandler
+from pyKook.Utils.loggingTool import logging
 
 
 @singleton

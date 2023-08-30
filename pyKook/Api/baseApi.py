@@ -1,6 +1,6 @@
 from pyKook.Config.accountConfig import accountConfig
 from pyKook.Utils.httpHandler import httpHandler
-import logging
+from pyKook.Utils.loggingTool import logging
 
 baseUrl = "https://www.kookapp.cn"
 

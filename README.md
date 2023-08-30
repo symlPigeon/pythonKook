@@ -68,7 +68,122 @@ asyncio.run(main())
 
 采用importlib修改导入模块来实现变量的注入，依次实现一个比较方便的插件系统。
 
-**还在做，明天就写完！**
+为了便于管理和开发，机器人采用了插件系统进行功能扩展。
+新建一个机器人项目，结构如下所示：
+
+```
+myBot
+ - main.py
+ - plugins/
+   - roll.py
+   - test.py
+   - disabled.py
+   - ...
+```
+
+其中`plugins`文件夹下存放了机器人实现的各类功能。以下面这个简单的例子来说明。
+编写`main.py`。
+
+```python
+import asyncio
+
+from pyKook.App.Bot import Bot
+from pyKook.Config import accountConfig, botConfig
+
+accountConf = accountConfig("Bot", "你的token", "zh-CN")
+botConf = botConfig(
+    command=".",
+    superusers=["具有操作机器人重要权限的人kook id"],
+    # 启用插件系统，如果False则插件系统不会启动
+    # 且下面的选项也不会生效，
+    # Bot只加载当前main.py中的命令
+    plugin_enable=True, 
+    # 插件所在文件夹的路径，带上“/”
+    plugin_path="plugins/", 
+    # 不需要加载的插件，如果你要禁用某个插件文件下面的所有命令
+    # 请直接写这个插件的文件名，
+    # 如果你要禁用某个插件下面的一个函数，则采用“插件名.函数名”的形式
+    # 在这里，我们禁用了disabled.py和test.py中的eventIgnoreMe函数
+    exclude_plugins=["disabled", "test.eventIgnoreMe"],
+    # 插件管理器提供了三个基本的命令用于动态加载管理：
+    # plugin_list: 列出所有的插件
+    # plugin_load: 加载一个被禁用的插件
+    # plugin_unload: 禁用一个已经加载的插件
+    # 如果你不要这个命令或者想要自行实现，可以将这个选项设置为False
+    use_plugin_cmd=True,
+)
+bot = Bot({"accountConfig": accountConf, "botConfig": botConf})
+
+
+async def main():
+    await bot.initialize()
+
+asyncio.run(main())
+```
+
+`roll.py`内容如下所示
+
+```python
+@bot.on_command("r")
+async def roll(msg):
+    import random
+    contents = msg.content().lstrip(".r ").strip().split("d")
+    try:
+        l, r = contents
+        l = int(l)
+        r = int(r)
+        dices = []
+        for _ in range(l):
+            dices.append(random.randint(1, r))
+        ans = "".join(["%d+" % i for i in dices])[:-1] + "= {}".format(sum(dices))
+        await bot.sendText(msg.getChannel(), ans, reply=msg)
+    except:
+        await bot.sendText(msg.getChannel(), "参数错误！", reply=msg)
+```
+
+你可能会注意到，这里的`bot`变量提示**未解析的引用**，
+不要担心这个问题，插件在加载时会自动向模块内注入`bot`变量。
+如果你需要使用IDE提供的代码检查机制，你可以采取如下的方式：
+
+```python
+from pyKook.App.Bot import Bot
+from pyKook.App.Object import Message
+
+bot: Bot # 让这里提示bot变量的类型
+
+@bot.on_event("isMentioned.atMe") # 这里会提示“可能未定义”，不用担心
+async def eventIsMentioned(msg: Message):
+    channel = msg.getChannel()
+    sender = msg.getAuthorId()
+    await bot.sendRichText(channel, "(met){}(met)你at你马呢？".format(sender))
+
+@bot.on_command("ignore_me")
+async def eventIgnoreMe(msg: Message):
+    channel = msg.getChannel()
+    sender = msg.getAuthorId()
+    await bot.sendRichText(channel, "Nothing happened.".format(sender))
+```
+
+`disabled.py`内容如下所示
+
+```python
+from pyKook.Utils.timer import Timer
+
+@bot.on_command("testDelete")
+async def testDelete(msg):
+    msg_id = await bot.sendText(msg.getChannel(), "本消息将在10秒后销毁", reply=msg)
+    msg_sent = bot.getMessageById(msg_id)
+    if not msg_sent:
+        return
+    timer = Timer(10, bot.deleteMessage, message=msg_sent)
+    timer.start()
+```
+
+模组的动态加载、卸载如图所示：
+
+![](.readme_assets/plugin_load_test.jpg)
+![](.readme_assets/plugin_unload.jpg)
+
 
 ## 项目结构
 

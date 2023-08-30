@@ -1,7 +1,7 @@
 from pyKook.Api.baseApi import multiPageAPI
 from pyKook.Config.accountConfig import accountConfig
 from pyKook.Api.objects.User import User
-import logging
+from pyKook.Utils.loggingTool import logging
 
 
 class getUserInGroupAPI(multiPageAPI):

@@ -1,6 +1,5 @@
 from pyKook.App.Object import Message
 from pyKook.Config.accountConfig import accountConfig
-from pyKook.Utils.cache import CACHED_INFO
 from pyKook.App.Session.sessionPool import sessionPool
 from pyKook.Utils.timer import Timer
 

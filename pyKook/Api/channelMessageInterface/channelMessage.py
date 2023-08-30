@@ -1,8 +1,6 @@
 from pyKook.Api.baseApi import baseAPI
 from pyKook.Config.accountConfig import accountConfig
 from pyKook.Api.constants.messageType import MSG_TYPE
-from pyKook.App.Object import Message
-import logging
 
 
 class sendChannelMsgAPI(baseAPI):

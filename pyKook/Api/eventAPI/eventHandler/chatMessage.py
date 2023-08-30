@@ -2,7 +2,7 @@ from typing import Tuple
 
 from pyKook.Api.eventAPI.baseEventHandler import baseEventHandler as baseEventHandler
 from pyKook.Api.objects import User as User
-import logging
+from pyKook.Utils.loggingTool import logging
 
 
 class chatMessageHandler(baseEventHandler):
@@ -12,7 +12,6 @@ class chatMessageHandler(baseEventHandler):
 
     def handle(self, msg: dict, bot_info: User) -> Tuple[dict, str]:
         bot_id = bot_info.getId()
-        logging.info(bot_id)
         extra = msg["extra"]
         if bot_id in extra["mention"]:
             # 直接at机器人

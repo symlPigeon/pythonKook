@@ -1,7 +1,7 @@
 import asyncio
 
 import websockets
-import logging
+from pyKook.Utils.loggingTool import logging
 import json
 from typing import Callable
 

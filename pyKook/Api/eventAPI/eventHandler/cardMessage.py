@@ -2,7 +2,7 @@ from typing import Tuple
 
 from pyKook.Api.eventAPI.baseEventHandler import baseEventHandler as baseEventHandler
 from pyKook.Api.objects import User as User
-import logging
+from pyKook.Utils.loggingTool import logging
 
 
 class cardButtonClickMessageHandler(baseEventHandler):

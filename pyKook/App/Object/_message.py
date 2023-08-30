@@ -1,5 +1,3 @@
-import logging
-from typing import Tuple
 from pyKook.Api.constants.messageType import MSG_TYPE
 
 

@@ -1,4 +1,4 @@
-import logging
+from pyKook.Utils.loggingTool import logging
 
 # TODO： 考虑对于速率限制的处理
 

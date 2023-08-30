@@ -10,9 +10,10 @@ from pyKook.Api.channelMessageInterface.channelMessage import (
     deleteChannelMsgAPI,
 )
 from pyKook.Utils.cache import CACHED_INFO
+from pyKook.Utils.pluginManager import pluginManager
 from pyKook.Config import accountConfig, botConfig
 from functools import wraps
-import logging
+from pyKook.Utils.loggingTool import logging
 
 
 class Bot:
@@ -20,6 +21,7 @@ class Bot:
         logging.info("System initializing...")
         self._accountConfig: accountConfig = configs["accountConfig"]
         self._botConfig: botConfig = configs["botConfig"]
+        self._pluginMgr = pluginManager(self, self._botConfig)
         self._session_pool = sessionPool(self)
         self._wshandler = None
         self._bot_info = User()
@@ -72,20 +74,35 @@ class Bot:
         :param func: 可选的，避免两个模组注册同一个事件时出现问题，不过好像不会出现这种情况？？？
         :return:
         """
+        if not func:
+            logging.info("Unloading event handler: {}".format(event_id))
+        else:
+            logging.info("Unloading function {} for event {}".format(func, event_id))
         if event_id in self._callback_pool:
-            if func == self._callback_pool[event_id] or not func:
+            if func.__name__ == self._callback_pool[event_id].__name__ or not func:
                 del self._callback_pool[event_id]
-        if event_id in self._privilege_callback_pool:
-            if func == self._privilege_callback_pool[event_id] or not func:
-                del self._privilege_callback_pool[event_id]
+                logging.info("Event handler unloaded.")
+        # 暂时考虑特权命令不卸载
+        # if event_id in self._privilege_callback_pool:
+        #     if (
+        #         func.__name__ == self._privilege_callback_pool[event_id].__name__
+        #         or not func
+        #     ):
+        #         del self._privilege_callback_pool[event_id]
+        #         logging.info("Privilege event handler unloaded.")
 
-    def load_handler(self, event_id: str, func: callable):
+    def load_handler(self, event_id: str, func: callable, privileged: bool = False):
         """
         加载某个事件的处理函数
         :param event_id: 事件ID
         :param func: 处理函数
         :return:
         """
+        logging.info("Loading function {} for event {}".format(func, event_id))
+        if privileged:
+            # 这个还是就给一些比较系统级别的东西来用
+            self._privilege_callback_pool[event_id] = func
+            return
         if event_id in self._callback_pool:
             logging.warning("Event handler already exists! Overwriting...")
         self._callback_pool[event_id] = func
@@ -94,6 +111,8 @@ class Bot:
         def _wrap_on_setup(callback):
             self._startup_list.append(callback)
             logging.info("Warping function {} for startup".format(callback))
+            _g = callback.__globals__
+            _g["bot"] = self
 
             @wraps(callback)
             def _warp():
@@ -117,6 +136,12 @@ class Bot:
                 self._privilege_callback_pool[event_id] = callback
             else:
                 self._callback_pool[event_id] = callback
+            # 修改函数__name__便于插件加载器识别
+            callback.__name__ = (
+                "decorated_on_event@" + event_id + "@" + callback.__name__
+            )
+            _g = callback.__globals__
+            _g["bot"] = self
             logging.info(
                 "Warping function {} for event id {}".format(callback, event_id)
             )
@@ -162,11 +187,16 @@ class Bot:
             await task()
         logging.info("All startup tasks finished.")
 
+    def _preinit_load_plugins(self):
+        if self._pluginMgr.isEnabled():
+            self._pluginMgr.load()
+
     async def initialize(self):
         logging.info("Initializing bot...")
         url = await self._preinit_get_gateway()
         await self._preinit_get_basic_info()
         await self._preinit_run_all_startup_tasks()
+        self._preinit_load_plugins()
         if url == "":
             raise Exception("Failed to get gateway.")
         self._wshandler = websocketMsgHandler()

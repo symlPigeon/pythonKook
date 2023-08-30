@@ -1,6 +1,6 @@
 from pyKook.Api.baseApi import baseAPI
 from pyKook.Config.accountConfig import accountConfig
-import logging
+from pyKook.Utils.loggingTool import logging
 
 
 class getGatewayAPI(baseAPI):

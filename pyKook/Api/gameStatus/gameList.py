@@ -1,4 +1,4 @@
-import logging
+from pyKook.Utils.loggingTool import logging
 
 from pyKook.Api.baseApi import multiPageAPI
 from pyKook.Config.accountConfig import accountConfig
