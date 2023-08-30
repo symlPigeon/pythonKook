@@ -60,3 +60,10 @@ class Message:
         if value in self._callbacks:
             return self._callbacks[value]
         return None, {}
+
+    def setMessageId(self, id):
+        """
+        设置消息ID
+        :return:
+        """
+        self._msg["msg_id"] = id

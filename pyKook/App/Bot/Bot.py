@@ -52,6 +52,7 @@ class Bot:
                     await self.deleteMessage(Message({"msg_id": card_id}, ""))
                     return
                 cb_, args = card.getCallback(button_value)
+                msg.setMessageId(card_id)  # 用原先消息的ID替代掉系统消息的ID
                 if cb_:
                     await cb_(msg, **args)
                 return

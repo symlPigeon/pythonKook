@@ -159,19 +159,16 @@ class Card:
                 }
             )
 
-    def addHeader(
-        self, header: str, text_type: str = "kmarkdown", card_index: int = -1
-    ):
+    def addHeader(self, header: str, card_index: int = -1):
         """
         添加标题
         :param header:
-        :param text_type:
         :param card_index:
         :return:
         """
         _body = self._get_card(card_index)
         _body["modules"].append(
-            {"type": "header", "text": {"type": text_type, "content": header}}
+            {"type": "header", "text": {"type": "plain-text", "content": header}}
         )
 
     def addDivider(self, card_index: int = -1):
@@ -195,7 +192,8 @@ class Card:
                 "type": "plain-text"或者"kmarkdown",
                 "content": "按钮名字"
             },
-            "args": {xxx:xxx} # 传给回调函数的参数
+            "args": {xxx:xxx}, # 传给回调函数的参数
+            "callback": callback,
         }
         :param card_index:
         :return:
@@ -206,6 +204,7 @@ class Card:
                 "type": "action-group",
                 "elements": [
                     {
+                        "type": "button",
                         "theme": element["theme"],
                         "value": element["value"],
                         "click": element["click"],
